@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Our Lady of Fatima University Quezon City</title>
+    <link rel="icon" href="{{ url_for('static', filename='OLFU_official_logo.png') }}" type="image/png">
+    <style>
+        body {
+            top: 0;
+            margin:0;
+            padding:0;
+        }
+        #Container {
+            margin: 0;
+            padding: 0;
+            height: 90vh; /* Full viewport height */
+            background: url("{{ url_for('static', filename='olfu.jpeg') }}") no-repeat center center/cover;
+        }
+        h1 {
+            margin:0;
+            top: 0;
+            text-align: center;         /* Center the text */
+            color: #ffffff;             /* White text */
+            background-color: #319177;  /* Dark green-blue background */
+            padding: 10px 10px;         /* Add some padding */
+            font-size: 28px;            /* Larger font size */
+            font-weight: bold;          /* Make it bold */
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Add a text shadow */
+        }
+        #chatButton {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #319177;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 20px 2px 10px rgba(0,0,0,0.2);
+        }
+
+        a {
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        #chatContainer {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 300px;
+            background: white;
+            border: 1px solid #ccc;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #chatHeader {
+            background: #319177;
+            font-weight: bold;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center; /* Centers the text */
+            align-items: center; /* Aligns items vertically */
+            position: relative; /* Allows absolute positioning for the logo */
+        }
+
+        #chatLogo {
+            width: 30px;
+            height: 30px;
+            position: absolute;
+            left: 10px; /* Positions logo in the upper left */
+            top: 50%;
+            transform: translateY(-50%); /* Centers vertically */
+        }
+
+        #chatBox {
+            height: 300px;
+            overflow-y: scroll;
+            padding: 10px;
+        }
+
+        #chatInputContainer {
+            display: flex;
+            border-top: 1px solid #ccc;
+        }
+
+        #userInput {
+            flex: 1;
+            padding: 10px;
+            border: none;
+        }
+
+        #sendButton {
+            padding: 10px;
+            background: #319177;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .user {
+            text-align: right;
+            color: black;
+            background-color: #f0f0f0;
+            padding: 5px;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+        .bot {
+            text-align: left;
+            color: #FFFFFF;
+            background-color: #319177;
+            padding: 5px;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to Our Lady of Fatima University Quezon City</h1>
+    <div id="Container">
+        <button id="chatButton" onclick="toggleChat()">&#x1F4AC</button>
+        <div id="chatContainer">
+            <div id="chatHeader" onclick="toggleChat()">
+                <img src="static/OLFU_official_logo.png" alt="Logo" id="chatLogo"> ADA Bot
+            </div>
+            <div id="chatBox"></div>
+            <div id="chatInputContainer">
+                <input type="text" id="userInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+                <button id="sendButton" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleChat() {
+            let chatContainer = document.getElementById("chatContainer");
+            chatContainer.style.display = (chatContainer.style.display == "none" || chatContainer.style.display == "") ? "block" : "none";
+        }
+
+        function sendMessage() {
+            let userInput = document.getElementById("userInput").value;
+
+            if (!userInput.trim()) return;
+
+            document.getElementById("chatBox").innerHTML += "<p class='user'><strong>You:</strong> " + userInput + "</p>";
+            document.getElementById("userInput").value = "";
+
+            fetch("/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message: userInput })
+})
+.then(response => response.json())
+.then(data => {
+    let formattedResponse = marked.parse(data.response || '');
+    document.getElementById("chatBox").innerHTML += "<div class='bot'><strong>Ada Bot:</strong> " + formattedResponse + "</div>";
+    document.getElementById("chatBox").scrollTop = document.getElementById("chatBox").scrollHeight;
+})
+.catch(error => {
+    document.getElementById("chatBox").innerHTML += "<div class='bot'><strong>Ada Bot:</strong> Sorry, an error occurred.</div>";
+    console.error("Error in chat fetch:", error);
+});
+
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</body>
+</html>
